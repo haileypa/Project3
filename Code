@@ -237,6 +237,11 @@ most_common_char = collections.Counter(chars_no_whitespace).most_common(1)[0][0]
 # Write code to create a dictionary whose keys are Twitter screen names and whose associated values are lists of tweet texts that that user posted. You may need to make additional queries to your database! To do this, you can use, and must use at least one of: the DefaultDict container in the collections library, a dictionary comprehension, list comprehension(s). Y
 # You should save the final dictionary in a variable called twitter_info_diction.
 
+query = "SELECT screen_name, text FROM Tweets INNER JOIN Users on Tweets.user_id = Users.user_id WHERE retweets >50"
+cur.execute(query)
+joined_result = cur.fetchall()
+tweet_text = [tweet[1] for tweet in joined_result]
+twitter_info_diction = {joined_result[0][0]:tweet_text}
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, but it's a pain). ###
 
