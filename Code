@@ -114,6 +114,66 @@ cur = conn.cursor()
 ## HINT #2: You may want to go back to a structure we used in class this week to ensure that you reference the user correctly in each Tweet record.
 ## HINT #3: The users mentioned in each tweet are included in the tweet dictionary -- you don't need to do any manipulation of the Tweet text to find out which they are! Do some nested data investigation on a dictionary that represents 1 tweet to see it!
 
+tatement = 'DROP TABLE IF EXISTS Tweets'
+cur.execute(statement)
+
+table_spec = 'CREATE TABLE IF NOT EXISTS '
+table_spec += 'Tweets (tweet_id TEXT, '
+table_spec += 'text TEXT, user_id TEXT, time_posted TIMESTAMP, retweets INTEGER)'
+cur.execute(table_spec)
+
+tweet_id = []
+text = []
+user_id = []
+time_posted = []
+retweets = []
+tweet_tuples = {}
+for tweet in umich_tweets:
+	tweet_id.append(tweet["id_str"])
+	text.append(tweet["text"])
+	user_id.append(tweet["user"]["id_str"])
+	time_posted.append(tweet["created_at"])
+	retweets.append(tweet["retweet_count"])
+tweet_tuples = zip(tweet_id, text, user_id, time_posted, retweets)
+statement = 'INSERT INTO Tweets VALUES (?, ?, ?, ?, ?)'
+
+for item in tweet_tuples:
+	cur.execute(statement, item)
+conn.commit()
+
+
+
+statement = 'DROP TABLE IF EXISTS Users'
+cur.execute(statement)
+
+table_spec = 'CREATE TABLE IF NOT EXISTS '
+table_spec += 'Users (user_id PRIMARY KEY, '
+table_spec += 'screen_name TEXT, num_favs INTEGER, description TEXT)'
+cur.execute(table_spec)
+
+users_mentioned = []
+users_in_mentioned = []
+
+for tweet in umich_tweets:
+	users_mentioned += tweet["entities"]["user_mentions"]
+
+users_in_mentioned.append(umich_tweets[0]["user"]["screen_name"])
+for a_user in users_mentioned:
+	users_in_mentioned.append(a_user["screen_name"])
+
+users_in_mentioned = set(users_in_mentioned)
+
+for user in users_in_mentioned:
+	user_info = []
+	users = get_user(user)
+	user_info.append(users["id_str"])
+	user_info.append(users["screen_name"])
+	user_info.append(users["favourites_count"])
+	user_info.append(users["description"])
+	statement = 'INSERT INTO Users Values (?, ?, ?, ?)' 
+	cur.execute(statement, user_info)
+	conn.commit()
+
 
 
 
